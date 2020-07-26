@@ -141,7 +141,8 @@ void cmt_spi3_write_fifo(const u8* p_buf, u16 len)
         cmt_spi3_fcsb_0();
 
         /* > 1 SCLK cycle */
-        mdelay(3);
+        cmt_spi3_delay();
+        cmt_spi3_delay();
 
         cmt_spi3_send(p_buf[i]);
 
