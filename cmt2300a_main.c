@@ -28,7 +28,7 @@ void cmt_spi3_send(u8 data8)
         /* Send byte on the rising edge of SCLK */
         if(data8 & 0x80)
             cmt_spi3_sdio_1();
-        else            
+        else
             cmt_spi3_sdio_0();
 
         cmt_spi3_delay();
@@ -67,7 +67,7 @@ u8 cmt_spi3_recv(void)
 void cmt_spi3_write(u8 addr, u8 dat)
 {
     cmt_spi3_sdio_1();
-    cmt_spi3_sclk_0(); 
+    cmt_spi3_sclk_0();
     cmt_spi3_fcsb_1();
     cmt_spi3_csb_0();
 
@@ -87,11 +87,11 @@ void cmt_spi3_write(u8 addr, u8 dat)
     cmt_spi3_delay();
 
     cmt_spi3_csb_1();
-    
+
     cmt_spi3_sdio_1();
     cmt_spi3_sdio_in();
-    
-    cmt_spi3_fcsb_1();    
+
+    cmt_spi3_fcsb_1();
 }
 
 void cmt_spi3_read(u8 addr, u8* p_dat)
@@ -110,7 +110,7 @@ void cmt_spi3_read(u8 addr, u8* p_dat)
 
     /* Must set SDIO to input before the falling edge of SCLK */
     cmt_spi3_sdio_in();
-    
+
     *p_dat = cmt_spi3_recv();
 
     cmt_spi3_sclk_0();
@@ -120,10 +120,10 @@ void cmt_spi3_read(u8 addr, u8* p_dat)
     cmt_spi3_delay();
 
     cmt_spi3_csb_1();
-    
+
     cmt_spi3_sdio_1();
     cmt_spi3_sdio_in();
-    
+
     cmt_spi3_fcsb_1();
 }
 
@@ -158,7 +158,7 @@ void cmt_spi3_write_fifo(const u8* p_buf, u16 len)
     }
 
     cmt_spi3_sdio_in();
-    
+
     cmt_spi3_fcsb_1();
 }
 
@@ -193,7 +193,7 @@ void cmt_spi3_read_fifo(u8* p_buf, u16 len)
     }
 
     cmt_spi3_sdio_in();
-    
+
     cmt_spi3_fcsb_1();
 }
 
@@ -203,10 +203,10 @@ void cmt_spi3_read_fifo(u8* p_buf, u16 len)
 * *********************************************************/
 void CMT2300A_InitGpio(void)
 {
-	CMT2300A_SetGpio1In();
+    CMT2300A_SetGpio1In();
     CMT2300A_SetGpio2In();
     CMT2300A_SetGpio3In();
-	
+
     cmt_spi3_init();
 }
 
@@ -220,7 +220,7 @@ u8 CMT2300A_ReadReg(u8 addr)
 {
     u8 dat = 0xFF;
     cmt_spi3_read(addr, &dat);
-	
+
     return dat;
 }
 
@@ -297,43 +297,55 @@ BOOL CMT2300A_AutoSwitchStatus(u8 nGoCmd)
 #ifdef ENABLE_AUTO_SWITCH_CHIP_STATUS
     u32 nBegTick = CMT2300A_GetTickCount();
     u8  nWaitStatus;
-    
+
     switch(nGoCmd)
     {
-    case CMT2300A_GO_SLEEP: nWaitStatus = CMT2300A_STA_SLEEP; break;
-    case CMT2300A_GO_STBY : nWaitStatus = CMT2300A_STA_STBY ; break;
-    case CMT2300A_GO_TFS  : nWaitStatus = CMT2300A_STA_TFS  ; break;
-    case CMT2300A_GO_TX   : nWaitStatus = CMT2300A_STA_TX   ; break;
-    case CMT2300A_GO_RFS  : nWaitStatus = CMT2300A_STA_RFS  ; break;
-    case CMT2300A_GO_RX   : nWaitStatus = CMT2300A_STA_RX   ; break;
+    case CMT2300A_GO_SLEEP:
+        nWaitStatus = CMT2300A_STA_SLEEP;
+        break;
+    case CMT2300A_GO_STBY :
+        nWaitStatus = CMT2300A_STA_STBY ;
+        break;
+    case CMT2300A_GO_TFS  :
+        nWaitStatus = CMT2300A_STA_TFS  ;
+        break;
+    case CMT2300A_GO_TX   :
+        nWaitStatus = CMT2300A_STA_TX   ;
+        break;
+    case CMT2300A_GO_RFS  :
+        nWaitStatus = CMT2300A_STA_RFS  ;
+        break;
+    case CMT2300A_GO_RX   :
+        nWaitStatus = CMT2300A_STA_RX   ;
+        break;
     }
-    
+
     CMT2300A_WriteReg(CMT2300A_CUS_MODE_CTL, nGoCmd);
-    
+
     while(CMT2300A_GetTickCount()-nBegTick < 10)
     {
         CMT2300A_DelayUs(100);
-        
+
         if(nWaitStatus==CMT2300A_GetChipStatus())
             return TRUE;
-        
+
         if(CMT2300A_GO_TX==nGoCmd) {
             CMT2300A_DelayUs(100);
-            
+
             if(CMT2300A_MASK_TX_DONE_FLG & CMT2300A_ReadReg(CMT2300A_CUS_INT_CLR1))
                 return TRUE;
         }
-        
+
         if(CMT2300A_GO_RX==nGoCmd) {
             CMT2300A_DelayUs(100);
-            
+
             if(CMT2300A_MASK_PKT_OK_FLG & CMT2300A_ReadReg(CMT2300A_CUS_INT_FLAG))
                 return TRUE;
         }
     }
-    
+
     return FALSE;
-    
+
 #else
     CMT2300A_WriteReg(CMT2300A_CUS_MODE_CTL, nGoCmd);
     return TRUE;
@@ -405,27 +417,27 @@ BOOL CMT2300A_GoRx(void)
 * @desc    Config GPIO pins mode.
 * @param   nGpioSel: GPIO1_SEL | GPIO2_SEL | GPIO3_SEL | GPIO4_SEL
 *          GPIO1_SEL:
-*            CMT2300A_GPIO1_SEL_DOUT/DIN 
+*            CMT2300A_GPIO1_SEL_DOUT/DIN
 *            CMT2300A_GPIO1_SEL_INT1
-*            CMT2300A_GPIO1_SEL_INT2 
+*            CMT2300A_GPIO1_SEL_INT2
 *            CMT2300A_GPIO1_SEL_DCLK
 *
 *          GPIO2_SEL:
-*            CMT2300A_GPIO2_SEL_INT1 
+*            CMT2300A_GPIO2_SEL_INT1
 *            CMT2300A_GPIO2_SEL_INT2
-*            CMT2300A_GPIO2_SEL_DOUT/DIN 
+*            CMT2300A_GPIO2_SEL_DOUT/DIN
 *            CMT2300A_GPIO2_SEL_DCLK
 *
 *          GPIO3_SEL:
-*            CMT2300A_GPIO3_SEL_CLKO 
+*            CMT2300A_GPIO3_SEL_CLKO
 *            CMT2300A_GPIO3_SEL_DOUT/DIN
-*            CMT2300A_GPIO3_SEL_INT2 
+*            CMT2300A_GPIO3_SEL_INT2
 *            CMT2300A_GPIO3_SEL_DCLK
 *
 *          GPIO4_SEL:
-*            CMT2300A_GPIO4_SEL_RSTIN 
+*            CMT2300A_GPIO4_SEL_RSTIN
 *            CMT2300A_GPIO4_SEL_INT1
-*            CMT2300A_GPIO4_SEL_DOUT 
+*            CMT2300A_GPIO4_SEL_DOUT
 *            CMT2300A_GPIO4_SEL_DCLK
 * *********************************************************/
 void CMT2300A_ConfigGpio(u8 nGpioSel)
@@ -499,12 +511,12 @@ void CMT2300A_SetInterruptPolar(BOOL bActiveHigh)
 * @param   nFifoThreshold
 * *********************************************************/
 void CMT2300A_SetFifoThreshold(u8 nFifoThreshold)
-{ 
+{
     u8 tmp = CMT2300A_ReadReg(CMT2300A_CUS_PKT29);
-    
+
     tmp &= ~CMT2300A_MASK_FIFO_TH;
     tmp |= nFifoThreshold & CMT2300A_MASK_FIFO_TH;
-    
+
     CMT2300A_WriteReg(CMT2300A_CUS_PKT29, tmp);
 }
 
@@ -512,7 +524,7 @@ void CMT2300A_SetFifoThreshold(u8 nFifoThreshold)
 * @name    CMT2300A_EnableAntennaSwitch
 * @desc    Enable antenna switch, output TX_ACTIVE/RX_ACTIVE
 *          via GPIO1/GPIO2.
-* @param   nMode 
+* @param   nMode
 *            0: RF_SWT1_EN=1, RF_SWT2_EN=0
 *               GPIO1: RX_ACTIVE, GPIO2: TX_ACTIVE
 *            1: RF_SWT1_EN=0, RF_SWT2_EN=1
@@ -537,7 +549,7 @@ void CMT2300A_EnableAntennaSwitch(u8 nMode)
 /*! ********************************************************
 * @name    CMT2300A_EnableInterrupt
 * @desc    Enable interrupt.
-* @param   nEnable 
+* @param   nEnable
 *            CMT2300A_MASK_SL_TMO_EN   |
 *            CMT2300A_MASK_RX_TMO_EN   |
 *            CMT2300A_MASK_TX_DONE_EN  |
@@ -595,7 +607,7 @@ void CMT2300A_EnableFifoMerge(BOOL bEnable)
 void CMT2300A_EnableReadFifo(void)
 {
     u8 tmp = CMT2300A_ReadReg(CMT2300A_CUS_FIFO_CTL);
-    tmp &= ~CMT2300A_MASK_SPI_FIFO_RD_WR_SEL; 
+    tmp &= ~CMT2300A_MASK_SPI_FIFO_RD_WR_SEL;
     tmp &= ~CMT2300A_MASK_FIFO_RX_TX_SEL;
     CMT2300A_WriteReg(CMT2300A_CUS_FIFO_CTL, tmp);
 }
@@ -679,13 +691,13 @@ u8 CMT2300A_ClearInterruptFlags(void)
     u8 nClr2 = 0;
     u8 nRet  = 0;
     u8 nIntPolar;
-    
+
     nIntPolar = CMT2300A_ReadReg(CMT2300A_CUS_INT1_CTL);
     nIntPolar = (nIntPolar & CMT2300A_MASK_INT_POLAR) ?1 :0;
 
     nFlag1 = CMT2300A_ReadReg(CMT2300A_CUS_INT_FLAG);
     nFlag2 = CMT2300A_ReadReg(CMT2300A_CUS_INT_CLR1);
-    
+
     if(nIntPolar) {
         /* Interrupt flag active-low */
         nFlag1 = ~nFlag1;
@@ -727,7 +739,7 @@ u8 CMT2300A_ClearInterruptFlags(void)
     if(CMT2300A_MASK_PKT_OK_FLG & nFlag1) {
         nClr2 |= CMT2300A_MASK_PKT_DONE_CLR;  /* Clear PKT_OK_FLG */
         nRet  |= CMT2300A_MASK_PKT_OK_FLG;    /* Return PKT_OK_FLG */
-    }    
+    }
 
     if(CMT2300A_MASK_SL_TMO_FLG & nFlag2) {
         nClr1 |= CMT2300A_MASK_SL_TMO_CLR;    /* Clear SL_TMO_FLG */
@@ -743,7 +755,7 @@ u8 CMT2300A_ClearInterruptFlags(void)
         nClr1 |= CMT2300A_MASK_TX_DONE_CLR;   /* Clear TX_DONE_FLG */
         nRet  |= CMT2300A_MASK_TX_DONE_EN;    /* Return TX_DONE_FLG by TX_DONE_EN */
     }
-    
+
     CMT2300A_WriteReg(CMT2300A_CUS_INT_CLR1, nClr1);
     CMT2300A_WriteReg(CMT2300A_CUS_INT_CLR2, nClr2);
 
@@ -758,7 +770,7 @@ u8 CMT2300A_ClearInterruptFlags(void)
 /*! ********************************************************
 * @name    CMT2300A_ConfigTxDin
 * @desc    Used to select whether to use GPIO1 or GPIO2 or GPIO3
-*          as DIN in the direct mode. It only takes effect when 
+*          as DIN in the direct mode. It only takes effect when
 *          call CMT2300A_EnableTxDin(TRUE) in the direct mode.
 * @param   nDinSel
 *            CMT2300A_TX_DIN_SEL_GPIO1
@@ -823,7 +835,7 @@ BOOL CMT2300A_IsExist(void)
 
     dat = CMT2300A_ReadReg(CMT2300A_CUS_PKT17);
     CMT2300A_WriteReg(CMT2300A_CUS_PKT17, back);
-	pr_info("CMT2300A_IsExist=%x\n",dat);
+    pr_info("CMT2300A_IsExist=%x\n",dat);
     if(0xAA==dat)
         return TRUE;
     else
@@ -863,8 +875,8 @@ void CMT2300A_SetFrequencyChannel(u8 nChann)
 
 /*! ********************************************************
 * @name    CMT2300A_SetFrequencyStep
-* @desc    This defines the frequency channel step size 
-*          for fast frequency hopping operation. 
+* @desc    This defines the frequency channel step size
+*          for fast frequency hopping operation.
 *          One step size is 2.5 kHz.
 * @param   nOffset: the frequency step
 * *********************************************************/
@@ -879,13 +891,13 @@ void CMT2300A_SetFrequencyStep(u8 nOffset)
 * @param   nLength
 * *********************************************************/
 void CMT2300A_SetPayloadLength(u16 nLength)
-{ 
+{
     u8 tmp = CMT2300A_ReadReg(CMT2300A_CUS_PKT14);
-    
+
     tmp &= ~CMT2300A_MASK_PAYLOAD_LENG_10_8;
     tmp |= (nLength >> 4) & CMT2300A_MASK_PAYLOAD_LENG_10_8;
     CMT2300A_WriteReg(CMT2300A_CUS_PKT14, tmp);
-    
+
     tmp = nLength & CMT2300A_MASK_PAYLOAD_LENG_7_0;
     CMT2300A_WriteReg(CMT2300A_CUS_PKT15, tmp);
 }
@@ -899,7 +911,7 @@ void CMT2300A_SetPayloadLength(u16 nLength)
 void CMT2300A_EnableLfosc(BOOL bEnable)
 {
     u8 tmp = CMT2300A_ReadReg(CMT2300A_CUS_SYS2);
-    
+
     if(bEnable) {
         tmp |= CMT2300A_MASK_LFOSC_RECAL_EN;
         tmp |= CMT2300A_MASK_LFOSC_CAL1_EN;
@@ -910,7 +922,7 @@ void CMT2300A_EnableLfosc(BOOL bEnable)
         tmp &= ~CMT2300A_MASK_LFOSC_CAL1_EN;
         tmp &= ~CMT2300A_MASK_LFOSC_CAL2_EN;
     }
-    
+
     CMT2300A_WriteReg(CMT2300A_CUS_SYS2, tmp);
 }
 
@@ -923,12 +935,12 @@ void CMT2300A_EnableLfosc(BOOL bEnable)
 void CMT2300A_EnableLfoscOutput(BOOL bEnable)
 {
     u8 tmp = CMT2300A_ReadReg(CMT2300A_CUS_INT2_CTL);
-    
+
     if(bEnable)
         tmp |= CMT2300A_MASK_LFOSC_OUT_EN;
     else
         tmp &= ~CMT2300A_MASK_LFOSC_OUT_EN;
-    
+
     CMT2300A_WriteReg(CMT2300A_CUS_INT2_CTL, tmp);
 }
 
@@ -941,12 +953,12 @@ void CMT2300A_EnableLfoscOutput(BOOL bEnable)
 void CMT2300A_EnableAfc(BOOL bEnable)
 {
     u8 tmp = CMT2300A_ReadReg(CMT2300A_CUS_FSK5);
-    
+
     if(bEnable)
         tmp |= 0x10;
     else
         tmp &= ~0x10;
-    
+
     CMT2300A_WriteReg(CMT2300A_CUS_FSK5, tmp);
 }
 
@@ -970,7 +982,7 @@ void CMT2300A_Init(void)
 
     CMT2300A_SoftReset();
     CMT2300A_DelayMs(20);
-    
+
     CMT2300A_GoStby();
 
     tmp  = CMT2300A_ReadReg(CMT2300A_CUS_MODE_STA);
@@ -981,7 +993,7 @@ void CMT2300A_Init(void)
     tmp  = CMT2300A_ReadReg(CMT2300A_CUS_EN_CTL);
     tmp |= CMT2300A_MASK_LOCKING_EN;         /* Enable LOCKING_EN */
     CMT2300A_WriteReg(CMT2300A_CUS_EN_CTL, tmp);
-    
+
     CMT2300A_EnableLfosc(FALSE);             /* Diable LFOSC */
 
     CMT2300A_ClearInterruptFlags();
@@ -1006,20 +1018,20 @@ void RF_Config(void)
     /* If you enable antenna switch, GPIO1/GPIO2 will output RX_ACTIVE/TX_ACTIVE,
        and it can't output INT1/INT2 via GPIO1/GPIO2 */
     CMT2300A_EnableAntennaSwitch(0);
-    
+
 #else
     /* Config GPIOs */
     CMT2300A_ConfigGpio(
         CMT2300A_GPIO1_SEL_INT1 | /* INT1 > GPIO1 */
         CMT2300A_GPIO2_SEL_INT2 | /* INT2 > GPIO2 */
         CMT2300A_GPIO3_SEL_DOUT
-        );
-    
+    );
+
     /* Config interrupt */
     CMT2300A_ConfigInterrupt(
         CMT2300A_INT_SEL_TX_DONE, /* Config INT1 */
         CMT2300A_INT_SEL_PKT_OK   /* Config INT2 */
-        );
+    );
 #endif
 
     /* Enable interrupt */
@@ -1030,20 +1042,20 @@ void RF_Config(void)
         CMT2300A_MASK_NODE_OK_EN  |
         CMT2300A_MASK_CRC_OK_EN   |
         CMT2300A_MASK_PKT_DONE_EN
-        );
-    
+    );
+
     /* Disable low frequency OSC calibration */
     CMT2300A_EnableLfosc(FALSE);
-    
+
     /* Use a single 64-byte FIFO for either Tx or Rx */
     //CMT2300A_EnableFifoMerge(TRUE);
-    
+
     //CMT2300A_SetFifoThreshold(16);
-    
+
     /* This is optional, only needed when using Rx fast frequency hopping */
     /* See AN142 and AN197 for details */
     //CMT2300A_SetAfcOvfTh(0x27);
-    
+
     /* Go to sleep for configuration to take effect */
     CMT2300A_GoSleep();
 }
@@ -1051,10 +1063,10 @@ void RF_Config(void)
 void RF_Init(void)
 {
     u8 tmp;
-    
+
     CMT2300A_InitGpio();
     CMT2300A_Init();
-    
+
     /* Config registers */
     CMT2300A_ConfigRegBank(CMT2300A_CMT_BANK_ADDR       , g_cmt2300aCmtBank       , CMT2300A_CMT_BANK_SIZE       );
     CMT2300A_ConfigRegBank(CMT2300A_SYSTEM_BANK_ADDR    , g_cmt2300aSystemBank    , CMT2300A_SYSTEM_BANK_SIZE    );
@@ -1062,11 +1074,11 @@ void RF_Init(void)
     CMT2300A_ConfigRegBank(CMT2300A_DATA_RATE_BANK_ADDR , g_cmt2300aDataRateBank  , CMT2300A_DATA_RATE_BANK_SIZE );
     CMT2300A_ConfigRegBank(CMT2300A_BASEBAND_BANK_ADDR  , g_cmt2300aBasebandBank  , CMT2300A_BASEBAND_BANK_SIZE  );
     CMT2300A_ConfigRegBank(CMT2300A_TX_BANK_ADDR        , g_cmt2300aTxBank        , CMT2300A_TX_BANK_SIZE        );
-    
+
     // xosc_aac_code[2:0] = 2
     tmp = (~0x07) & CMT2300A_ReadReg(CMT2300A_CUS_CMT10);
     CMT2300A_WriteReg(CMT2300A_CUS_CMT10, tmp|0x02);
-    
+
     RF_Config();
 }
 
@@ -1092,9 +1104,8 @@ void RF_StartRx(u8 buf[], u16 len, u32 timeout)
     g_pRxBuffer = buf;
     g_nRxLength = len;
     g_nRxTimeout = timeout;
-    
+
     memset(g_pRxBuffer, 0, g_nRxLength);
-    
     g_nNextRFState = RF_STATE_RX_START;
 }
 
@@ -1103,7 +1114,7 @@ void RF_StartTx(u8 buf[], u16 len, u32 timeout)
     g_pTxBuffer = buf;
     g_nTxLength = len;
     g_nTxTimeout = timeout;
-    
+
     g_nNextRFState = RF_STATE_TX_START;
 }
 
@@ -1111,34 +1122,34 @@ EnumRFResult RF_Process(void)
 {
     EnumRFResult nRes = RF_BUSY;
     int ret;
-    
-    switch(g_nNextRFState) 
+
+    switch(g_nNextRFState)
     {
     case RF_STATE_IDLE:
     {
         nRes = RF_IDLE;
         break;
     }
-    
+
     case RF_STATE_RX_START:
     {
         CMT2300A_GoStby();
         CMT2300A_ClearInterruptFlags();
-        
+
         /* Must clear FIFO after enable SPI to read or write the FIFO */
         CMT2300A_EnableReadFifo();
         CMT2300A_ClearRxFifo();
-        
+
         if(FALSE==CMT2300A_GoRx())
             g_nNextRFState = RF_STATE_ERROR;
         else
             g_nNextRFState = RF_STATE_RX_WAIT;
-        
+
         g_nRxTimeCount = CMT2300A_GetTickCount();
-        
+
         break;
     }
-    
+
     case RF_STATE_RX_WAIT:
     {
 #ifdef ENABLE_ANTENNA_SWITCH
@@ -1149,13 +1160,13 @@ EnumRFResult RF_Process(void)
         {
             g_nNextRFState = RF_STATE_RX_DONE;
         }
-		ret=ktime_to_ms(ktime_sub(g_nSysTickCount,g_nRxTimeCount));
+        ret=ktime_to_ms(ktime_sub(g_nSysTickCount,g_nRxTimeCount));
         if(ret>g_nRxTimeout)
             g_nNextRFState = RF_STATE_RX_TIMEOUT;
-        
+
         break;
     }
-    
+
     case RF_STATE_RX_DONE:
     {
         CMT2300A_GoStby();
@@ -1164,35 +1175,35 @@ EnumRFResult RF_Process(void)
         CMT2300A_ReadFifo(g_pRxBuffer, g_nRxLength);
 
         g_nInterrutFlags = CMT2300A_ClearInterruptFlags();
-            
+
         CMT2300A_GoSleep();
-        
+
         g_nNextRFState = RF_STATE_IDLE;
         nRes = RF_RX_DONE;
         break;
     }
-    
+
     case RF_STATE_RX_TIMEOUT:
     {
         CMT2300A_GoSleep();
-        
+
         g_nNextRFState = RF_STATE_IDLE;
         nRes = RF_RX_TIMEOUT;
         break;
     }
-    
+
     case RF_STATE_TX_START:
     {
         CMT2300A_GoStby();
         CMT2300A_ClearInterruptFlags();
-        
+
         /* Must clear FIFO after enable SPI to read or write the FIFO */
         CMT2300A_EnableWriteFifo();
         CMT2300A_ClearTxFifo();
-        
+
         /* The length need be smaller than 32 */
         CMT2300A_WriteFifo(g_pTxBuffer, g_nTxLength);
-        
+
         if( 0==(CMT2300A_MASK_TX_FIFO_NMTY_FLG & CMT2300A_ReadReg(CMT2300A_CUS_FIFO_FLAG)) )
             g_nNextRFState = RF_STATE_ERROR;
 
@@ -1200,12 +1211,12 @@ EnumRFResult RF_Process(void)
             g_nNextRFState = RF_STATE_ERROR;
         else
             g_nNextRFState = RF_STATE_TX_WAIT;
-        
+
         g_nTxTimeCount = CMT2300A_GetTickCount();
-        
+
         break;
     }
-        
+
     case RF_STATE_TX_WAIT:
     {
 #ifdef ENABLE_ANTENNA_SWITCH
@@ -1216,16 +1227,16 @@ EnumRFResult RF_Process(void)
         {
             g_nNextRFState = RF_STATE_TX_DONE;
         }
-        
-		ret=ktime_to_ms(ktime_sub(g_nSysTickCount,g_nTxTimeCount));
-        if(ret>g_nTxTimeout){
+
+        ret=ktime_to_ms(ktime_sub(g_nSysTickCount,g_nTxTimeCount));
+        if(ret>g_nTxTimeout) {
             g_nNextRFState = RF_STATE_TX_TIMEOUT;
-			pr_info("RF_STATE_TX_WAIT g_nNextRFState=%d ret=%d %d\n",g_nNextRFState,ret,g_nTxTimeout);
-		}
-            
+            pr_info("RF_STATE_TX_WAIT g_nNextRFState=%d ret=%d %d\n",g_nNextRFState,ret,g_nTxTimeout);
+        }
+
         break;
     }
-            
+
     case RF_STATE_TX_DONE:
     {
         CMT2300A_ClearInterruptFlags();
@@ -1235,384 +1246,443 @@ EnumRFResult RF_Process(void)
         nRes = RF_TX_DONE;
         break;
     }
-    
+
     case RF_STATE_TX_TIMEOUT:
     {
         CMT2300A_GoSleep();
-        
+
         g_nNextRFState = RF_STATE_IDLE;
         nRes = RF_TX_TIMEOUT;
         break;
     }
-    
+
     case RF_STATE_ERROR:
     {
         CMT2300A_SoftReset();
         CMT2300A_DelayMs(20);
-        
+
         CMT2300A_GoStby();
         RF_Config();
-        
+
         g_nNextRFState = RF_STATE_IDLE;
         nRes = RF_ERROR;
         break;
     }
-    
+
     default:
         break;
     }
-    
+
     return nRes;
 }
 
-void OnMaster(void){
+void OnMaster(void) {
     char str[32];
-    switch(RF_Process()){
-		case RF_IDLE:
-			g_nSendCount++;
-			g_txBuffer[0] = (u8)g_nSendCount;
-			g_txBuffer[1] = g_nSendCount >> 8;
-			RF_StartTx(g_txBuffer, RF_PACKET_SIZE, 1000);
-			break;
+    switch(RF_Process()) {
+    case RF_IDLE:
+        g_nSendCount++;
+        g_txBuffer[0] = (u8)g_nSendCount;
+        g_txBuffer[1] = g_nSendCount >> 8;
+        RF_StartTx(g_txBuffer, RF_PACKET_SIZE, 1000);
+        break;
 
-		case RF_TX_DONE:
-			sprintf(str, "send: %d", g_nSendCount);
-			pr_info("%s\n",str);
-			RF_StartRx(g_rxBuffer, RF_PACKET_SIZE, 1000);
-			break;
+    case RF_TX_DONE:
+        sprintf(str, "send: %d", g_nSendCount);
+        pr_info("%s\n",str);
+        RF_StartRx(g_rxBuffer, RF_PACKET_SIZE, 1000);
+        break;
 
-		case RF_RX_DONE:
-			g_nRecvCount++;
-			sprintf(str, "recv: %d", g_nRecvCount);
-			pr_info("%s\n",str);
-			break;
+    case RF_RX_DONE:
+        g_nRecvCount++;
+        sprintf(str, "recv: %d", g_nRecvCount);
+        pr_info("%s\n",str);
+        break;
 
-		case RF_RX_TIMEOUT:
-			sprintf(str, "recv:timeout");
-			pr_info("%s\n",str);
-			break;
+    case RF_RX_TIMEOUT:
+        sprintf(str, "recv:timeout");
+        pr_info("%s\n",str);
+        break;
 
-		case RF_ERROR:
-			sprintf(str, "error: %d", ++g_nErrCount);
-			pr_info("%s\n",str);
-			break;
+    case RF_ERROR:
+        sprintf(str, "error: %d", ++g_nErrCount);
+        pr_info("%s\n",str);
+        break;
 
-		default:
-			break;
-	}
+    default:
+        break;
+    }
 }
 
-int cmt2300a_send_signal(void){
-		int ret;
-		RF_Init();
+int cmt2300a_send_signal(void) {
+    int ret;
+    RF_Init();
 
-		RF_StartTx(g_txBuffer, RF_PACKET_SIZE, 1000);
+    RF_StartTx(g_txBuffer, RF_PACKET_SIZE, 1000);
 
 //RF_STATE_TX_START
-		CMT2300A_GoStby();
-        CMT2300A_ClearInterruptFlags();
+    CMT2300A_GoStby();
+    CMT2300A_ClearInterruptFlags();
 
-        /* Must clear FIFO after enable SPI to read or write the FIFO */
-        CMT2300A_EnableWriteFifo();
-        CMT2300A_ClearTxFifo();
+    /* Must clear FIFO after enable SPI to read or write the FIFO */
+    CMT2300A_EnableWriteFifo();
+    CMT2300A_ClearTxFifo();
 
-        /* The length need be smaller than 32 */
-        CMT2300A_WriteFifo(g_pTxBuffer, g_nTxLength);
+    /* The length need be smaller than 32 */
+    CMT2300A_WriteFifo(g_pTxBuffer, g_nTxLength);
 
-        if( 0==(CMT2300A_MASK_TX_FIFO_NMTY_FLG & CMT2300A_ReadReg(CMT2300A_CUS_FIFO_FLAG)) ){
-            g_nNextRFState = RF_STATE_ERROR;
-			goto err;
-		}
+    if( 0==(CMT2300A_MASK_TX_FIFO_NMTY_FLG & CMT2300A_ReadReg(CMT2300A_CUS_FIFO_FLAG)) ) {
+        g_nNextRFState = RF_STATE_ERROR;
+        goto err;
+    }
 
-        if(FALSE==CMT2300A_GoTx()){
-            g_nNextRFState = RF_STATE_ERROR;
-			goto err;
-		}
-        else{
-            g_nNextRFState = RF_STATE_TX_WAIT;
-		}
+    if(FALSE==CMT2300A_GoTx()) {
+        g_nNextRFState = RF_STATE_ERROR;
+        goto err;
+    }
+    else {
+        g_nNextRFState = RF_STATE_TX_WAIT;
+    }
 
 //RF_STATE_TX_WAIT
 #ifdef ENABLE_ANTENNA_SWITCH
-        ret=CMT2300A_MASK_TX_DONE_FLG & CMT2300A_ReadReg(CMT2300A_CUS_INT_CLR1);  /* Read TX_DONE flag */
-		//need redesign
+    ret=CMT2300A_MASK_TX_DONE_FLG & CMT2300A_ReadReg(CMT2300A_CUS_INT_CLR1);  /* Read TX_DONE flag */
+    //need redesign
 #else
-		ret=wait_for_completion_timeout(&tx_done_complete,msecs_to_jiffies(g_nTxTimeout));
+    ret=wait_for_completion_timeout(&tx_done_complete,msecs_to_jiffies(g_nTxTimeout));
 #endif
-		if(ret>0){
-            g_nNextRFState = RF_STATE_TX_DONE;
-        }
-        if(ret==0){
-            g_nNextRFState = RF_STATE_TX_TIMEOUT;
-		}
+    if(ret>0) {
+        g_nNextRFState = RF_STATE_TX_DONE;
+    }
+    if(ret==0) {
+        g_nNextRFState = RF_STATE_TX_TIMEOUT;
+    }
 err:
-		pr_info("g_nNextRFState=%d\n",g_nNextRFState);
-		return g_nNextRFState;
+    pr_info("g_nNextRFState=%d\n",g_nNextRFState);
+    return g_nNextRFState;
 }
 
-int cmt2300a_receive_signal(void){
-		int ret;
-		RF_StartRx(g_rxBuffer, RF_PACKET_SIZE, 1000);
+int cmt2300a_receive_signal(void) {
+    int ret;
+    RF_StartRx(g_rxBuffer, RF_PACKET_SIZE, 1000);
 
-		CMT2300A_GoStby();
-        CMT2300A_ClearInterruptFlags();
+    CMT2300A_GoStby();
+    CMT2300A_ClearInterruptFlags();
 
-        /* Must clear FIFO after enable SPI to read or write the FIFO */
-        CMT2300A_EnableReadFifo();
-        CMT2300A_ClearRxFifo();
+    /* Must clear FIFO after enable SPI to read or write the FIFO */
+    CMT2300A_EnableReadFifo();
+    CMT2300A_ClearRxFifo();
 
-        if(FALSE==CMT2300A_GoRx()){
-            g_nNextRFState = RF_STATE_ERROR;
-			goto err;
-		}
+    if(FALSE==CMT2300A_GoRx()) {
+        g_nNextRFState = RF_STATE_ERROR;
+        goto err;
+    }
 
 #ifdef ENABLE_ANTENNA_SWITCH
-        if(CMT2300A_MASK_PKT_OK_FLG & CMT2300A_ReadReg(CMT2300A_CUS_INT_FLAG))  /* Read PKT_OK flag */
-		//need redesign
+    if(CMT2300A_MASK_PKT_OK_FLG & CMT2300A_ReadReg(CMT2300A_CUS_INT_FLAG))  /* Read PKT_OK flag */
+        //need redesign
 #else
-        ret=wait_for_completion_timeout(&rx_done_complete,msecs_to_jiffies(g_nRxTimeout));
+    ret=wait_for_completion_timeout(&rx_done_complete,msecs_to_jiffies(g_nRxTimeout));
 #endif
-        if(ret==0){
+        if(ret==0) {
             g_nNextRFState = RF_STATE_RX_TIMEOUT;
-			goto err;
-		}else{
-			 g_nNextRFState = RF_STATE_RX_DONE;
-			 CMT2300A_GoStby();
+            goto err;
+        } else {
+            CMT2300A_GoStby();
 
-			/* The length need be smaller than 32 */
-			CMT2300A_ReadFifo(g_pRxBuffer, g_nRxLength);
+            /* The length need be smaller than 32 */
+            CMT2300A_ReadFifo(g_pRxBuffer, g_nRxLength);
 
-			g_nInterrutFlags = CMT2300A_ClearInterruptFlags();
+            g_nInterrutFlags = CMT2300A_ClearInterruptFlags();
 
-			CMT2300A_GoSleep();
-			g_nNextRFState = RF_RX_DONE;
-		}
+            CMT2300A_GoSleep();
+            g_nNextRFState = RF_STATE_RX_DONE;
+        }
 err:
-		pr_info("g_nNextRFState=%d\n",g_nNextRFState);
-		return g_nNextRFState;
+    pr_info("g_nNextRFState=%d\n",g_nNextRFState);
+    return g_nNextRFState;
 }
 
-static ssize_t cmt2300a_send_store(struct device *dev,struct device_attribute *attr,const char *buf, size_t count){
+static ssize_t cmt2300a_send_store(struct device *dev,struct device_attribute *attr,const char *buf, size_t count) {
     int ret=0;
-	int i;
-	ret=simple_strtoul(buf,NULL,10);
-	gpio_direction_output(cmt2300a_en,ret);
-	for(i=0; i<RF_PACKET_SIZE; i++)
-		g_txBuffer[i] = i+1;
-	ret=cmt2300a_send_signal();
+    int i;
+    ret=simple_strtoul(buf,NULL,10);
+    gpio_direction_output(cmt2300a_en,1);
+    for(i=0; i<RF_PACKET_SIZE; i++)
+        g_txBuffer[i] = i+1;
+    ret=cmt2300a_send_signal();
+    gpio_direction_output(cmt2300a_en,0);
     return count;
- }
-
- static ssize_t cmt2300a_send_show(struct device *dev,struct device_attribute *attr, char *buf){
-       return sprintf(buf,"g_nNextRFState=%d\n",g_nNextRFState);
 }
 
-static ssize_t cmt2300a_send_test_show(struct device *dev,struct device_attribute *attr, char *buf){
-
-		if(cmt2300a_send_thread!=NULL)
-            kthread_stop(cmt2300a_send_thread);
-		__pm_relax(&tx_wake_lock);
-       return sprintf(buf,"send cmt2300a count %lld\n",cmt2300a_send_count);
+static ssize_t cmt2300a_send_show(struct device *dev,struct device_attribute *attr, char *buf) {
+    return sprintf(buf,"g_nNextRFState=%d\n",g_nNextRFState);
 }
 
-static int cmt2300a_send(void *data){
-    do{
-		printk(KERN_INFO "cmt2300a_send: %lld times\n", cmt2300a_send_count);
-		cmt2300a_send_signal();
-		cmt2300a_send_count++;
-		msleep(100);
-    }while(!kthread_should_stop());
+static ssize_t cmt2300a_send_test_show(struct device *dev,struct device_attribute *attr, char *buf) {
+
+    if(cmt2300a_send_thread!=NULL)
+        kthread_stop(cmt2300a_send_thread);
+    __pm_relax(&tx_wake_lock);
+    gpio_direction_output(cmt2300a_en,0);
+    return sprintf(buf,"send cmt2300a count %lld\n",cmt2300a_send_count);
+}
+
+static int cmt2300a_send(void *data) {
+    int i;
+    unsigned char msg=0;
+    gpio_direction_output(cmt2300a_en,1);
+    do {
+        for(i=0; i<RF_PACKET_SIZE; i++)
+            g_txBuffer[i] = msg;
+        msg++;
+        printk(KERN_INFO "cmt2300a_send: %lld times\n", cmt2300a_send_count);
+        cmt2300a_send_signal();
+        cmt2300a_send_count++;
+        msleep(100);
+    } while(!kthread_should_stop());
     cmt2300a_send_thread=NULL;
     return 0;
- }
-static ssize_t cmt2300a_send_test_store(struct device *dev,struct device_attribute *attr,const char *buf, size_t count){
+}
+static ssize_t cmt2300a_send_test_store(struct device *dev,struct device_attribute *attr,const char *buf, size_t count) {
 
-	cmt2300a_send_thread = kthread_run(cmt2300a_send, NULL, "cmt2300a_send");
+    cmt2300a_send_thread = kthread_run(cmt2300a_send, NULL, "cmt2300a_send");
     if (IS_ERR(cmt2300a_send_thread)) {
-		printk(KERN_ERR "failed to create thread,err %ld\n",PTR_ERR(cmt2300a_send_thread));
+        printk(KERN_ERR "failed to create thread,err %ld\n",PTR_ERR(cmt2300a_send_thread));
         cmt2300a_send_thread = NULL;
     }
-	cmt2300a_send_count=0;
+    cmt2300a_send_count=0;
 
     __pm_stay_awake(&tx_wake_lock);
     return count;
- }
+}
 
-static ssize_t cmt2300a_receive_show(struct device *dev,struct device_attribute *attr, char *buf){
-	pr_info("receive data length %d\n",g_nRxLength);
-	print_hex_dump(KERN_INFO, "RX:", DUMP_PREFIX_NONE, 16, 1 , g_rxBuffer,g_nRxLength, true);
+static ssize_t cmt2300a_receive_show(struct device *dev,struct device_attribute *attr, char *buf) {
+    pr_info("receive data length %d\n",g_nRxLength);
+    print_hex_dump(KERN_INFO, "RX:", DUMP_PREFIX_NONE, 16, 1 , g_rxBuffer,g_nRxLength, true);
     return sprintf(buf,"receive data length is %d\n",g_nRxLength);
 }
-static ssize_t cmt2300a_receive_store(struct device *dev,struct device_attribute *attr,const char *buf, size_t count){
+
+static ssize_t cmt2300a_receive_store(struct device *dev,struct device_attribute *attr,const char *buf, size_t count) {
     int ret=0;
-	gpio_direction_output(cmt2300a_en,1);
-	ret=simple_strtoul(buf,NULL,10);
-	RF_Init();
-	cmt2300a_receive_signal();
-	return count;
+    gpio_direction_output(cmt2300a_en,1);
+    ret=simple_strtoul(buf,NULL,10);
+    RF_Init();
+    cmt2300a_receive_signal();
+    gpio_direction_output(cmt2300a_en,0);
+    return count;
 }
 
- static ssize_t cmt2300a_exist_show(struct device *dev,struct device_attribute *attr, char *buf){
-		BOOL ret;
-		gpio_direction_output(cmt2300a_en,1);
-		ret=CMT2300A_IsExist();
-		gpio_direction_output(cmt2300a_en,0);
-       return sprintf(buf,"connect to cmt2300a %d\n",ret);
+static ssize_t cmt2300a_receive_test_show(struct device *dev,struct device_attribute *attr, char *buf) {
+
+    if(cmt2300a_receive_thread!=NULL)
+        kthread_stop(cmt2300a_receive_thread);
+    __pm_relax(&rx_wake_lock);
+    return sprintf(buf,"receive cmt2300a count %lld\n",cmt2300a_receive_count);
 }
 
+static int cmt2300a_receive(void *data) {
+    int ret;
+    gpio_direction_output(cmt2300a_en,1);
+    RF_Init();
+    do {
+        ret=cmt2300a_receive_signal();
+        if(ret==RF_STATE_RX_DONE) {
+            print_hex_dump(KERN_INFO, "RX:", DUMP_PREFIX_NONE, 16, 1 , g_rxBuffer,g_nRxLength, true);
+        }
+        printk(KERN_INFO "cmt2300a_receive: %lld times\n", cmt2300a_receive_count);
+        cmt2300a_receive_count++;
+    } while(!kthread_should_stop());
+    cmt2300a_send_thread=NULL;
+    return 0;
+}
+static ssize_t cmt2300a_receive_test_store(struct device *dev,struct device_attribute *attr,const char *buf, size_t count) {
+
+    cmt2300a_receive_thread = kthread_run(cmt2300a_receive, NULL, "cmt2300a_receive");
+    if (IS_ERR(cmt2300a_receive_thread)) {
+        printk(KERN_ERR "failed to create thread,err %ld\n",PTR_ERR(cmt2300a_receive_thread));
+        cmt2300a_receive_thread = NULL;
+    }
+    cmt2300a_receive_count=0;
+    __pm_stay_awake(&rx_wake_lock);
+    return count;
+}
+
+static ssize_t cmt2300a_exist_show(struct device *dev,struct device_attribute *attr, char *buf) {
+    BOOL ret;
+    gpio_direction_output(cmt2300a_en,1);
+    ret=CMT2300A_IsExist();
+    gpio_direction_output(cmt2300a_en,0);
+    return sprintf(buf,"connect to cmt2300a %d\n",ret);
+}
+
+static DEVICE_ATTR(exist,0444,cmt2300a_exist_show,NULL);
 static DEVICE_ATTR(send,0600,cmt2300a_send_show,cmt2300a_send_store);
 static DEVICE_ATTR(send_test,0600,cmt2300a_send_test_show,cmt2300a_send_test_store);
 static DEVICE_ATTR(receive,0600,cmt2300a_receive_show,cmt2300a_receive_store);
-static DEVICE_ATTR(exist,0444,cmt2300a_exist_show,NULL);
+static DEVICE_ATTR(receive_test,0600,cmt2300a_receive_test_show,cmt2300a_receive_test_store);
 
+static struct attribute *cmt2300a_attributes[] = {
+    &dev_attr_exist.attr,
+    &dev_attr_send.attr,
+    &dev_attr_send_test.attr,
+    &dev_attr_receive.attr,
+    &dev_attr_receive_test.attr,
+    NULL
+};
+
+static const struct attribute_group cmt2300a_attributes_group = {
+    .attrs = cmt2300a_attributes,
+};
 
 static irqreturn_t send_handle(int irq, void *dev_id)
 {
-	   if(CMT2300A_ReadGpio1()){
-			complete(&tx_done_complete);
-	   }
-       return IRQ_HANDLED;
+    if(CMT2300A_ReadGpio1()) {
+        complete(&tx_done_complete);
+    }
+    return IRQ_HANDLED;
 }
 
 static irqreturn_t receive_handle(int irq, void *dev_id)
 {
-	   if(CMT2300A_ReadGpio2()){
-			complete(&rx_done_complete);
-	   }
-       return IRQ_HANDLED;
+    if(CMT2300A_ReadGpio2()) {
+        complete(&rx_done_complete);
+    }
+    return IRQ_HANDLED;
 }
 
 void get_dts_info(struct platform_device *pdev)
 {
-	int ret;
-	int virq;
-	cmt2300a_en=of_get_named_gpio_flags(pdev->dev.of_node, "en-gpios", 0 , 0);
-	if(cmt2300a_en < 0)
+    int ret;
+    int virq;
+    cmt2300a_en=of_get_named_gpio_flags(pdev->dev.of_node, "en-gpios", 0 , 0);
+    if(cmt2300a_en < 0)
         pr_err("Unable to get cmt2300a_en gpio\n");
-    else{
-            ret=gpio_request(cmt2300a_en, "cmt2300a_en");
-            if(ret<0)
-                    pr_err("request cmt2300a_en err!");
+    else {
+        ret=gpio_request(cmt2300a_en, "cmt2300a_en");
+        if(ret<0)
+            pr_err("request cmt2300a_en err!");
     }
 
-	cmt2300a_clk=of_get_named_gpio_flags(pdev->dev.of_node, "clk-gpios", 0 , 0);
-	if(cmt2300a_clk < 0)
+    cmt2300a_clk=of_get_named_gpio_flags(pdev->dev.of_node, "clk-gpios", 0 , 0);
+    if(cmt2300a_clk < 0)
         pr_err("Unable to get cmt2300a_clk\n");
-    else{
-            ret=gpio_request(cmt2300a_clk, "cmt2300a_clk");
-            if(ret<0)
-                    pr_err("request cmt2300a_clk err!");
+    else {
+        ret=gpio_request(cmt2300a_clk, "cmt2300a_clk");
+        if(ret<0)
+            pr_err("request cmt2300a_clk err!");
     }
-	
-	cmt2300a_sdio=of_get_named_gpio_flags(pdev->dev.of_node, "sdio-gpios", 0 , 0);
-	if(cmt2300a_sdio < 0)
+
+    cmt2300a_sdio=of_get_named_gpio_flags(pdev->dev.of_node, "sdio-gpios", 0 , 0);
+    if(cmt2300a_sdio < 0)
         pr_err("Unable to get cmt2300a_sdio\n");
-    else{
-            ret=gpio_request(cmt2300a_sdio, "cmt2300a-sdio");
-            if(ret<0)
-                    pr_err("request cmt2300a_sdio err!");
+    else {
+        ret=gpio_request(cmt2300a_sdio, "cmt2300a-sdio");
+        if(ret<0)
+            pr_err("request cmt2300a_sdio err!");
     }
-	
-	cmt2300a_fcsb=of_get_named_gpio_flags(pdev->dev.of_node, "fcsb-gpios", 0 , 0);
-	if(cmt2300a_fcsb < 0)
+
+    cmt2300a_fcsb=of_get_named_gpio_flags(pdev->dev.of_node, "fcsb-gpios", 0 , 0);
+    if(cmt2300a_fcsb < 0)
         pr_err("Unable to get cmt2300a_fcsb\n");
-    else{
-            ret=gpio_request(cmt2300a_fcsb, "cmt2300a-fcsb");
-            if(ret<0)
-                    pr_err("request cmt2300a_fcsb err!");
+    else {
+        ret=gpio_request(cmt2300a_fcsb, "cmt2300a-fcsb");
+        if(ret<0)
+            pr_err("request cmt2300a_fcsb err!");
     }
-	
-	cmt2300a_csb=of_get_named_gpio_flags(pdev->dev.of_node, "csb-gpios",0 , 0);
-	if(cmt2300a_csb < 0)
+
+    cmt2300a_csb=of_get_named_gpio_flags(pdev->dev.of_node, "csb-gpios",0 , 0);
+    if(cmt2300a_csb < 0)
         pr_err("Unable to get cmt2300a_csb\n");
-    else{
-            ret=gpio_request(cmt2300a_csb, "cmt2300a-csb");
-            if(ret<0)
-                    pr_err("request cmt2300a_csb err!");
+    else {
+        ret=gpio_request(cmt2300a_csb, "cmt2300a-csb");
+        if(ret<0)
+            pr_err("request cmt2300a_csb err!");
     }
 
-	cmt2300a_gpio1=of_get_named_gpio_flags(pdev->dev.of_node, "gpio1-gpios", 0 , 0);
-	if(cmt2300a_gpio1 < 0)
+    cmt2300a_gpio1=of_get_named_gpio_flags(pdev->dev.of_node, "gpio1-gpios", 0 , 0);
+    if(cmt2300a_gpio1 < 0)
         pr_err("Unable to get cmt2300a_gpio1\n");
-    else{
-            ret=gpio_request(cmt2300a_gpio1, "cmt2300a-gpio1");
-            if(ret<0)
-				pr_err("request cmt2300a_gpio1 err!");
-			else{
-				virq=gpio_to_irq(cmt2300a_gpio1);
-				ret = request_irq(virq,send_handle,IRQF_TRIGGER_RISING,"cmt2300a_send_complete", NULL);
-				if(ret<0){
-					pr_err("request cmt2300a_gpio1 to irq err!");
-				}
-			}
+    else {
+        ret=gpio_request(cmt2300a_gpio1, "cmt2300a-gpio1");
+        if(ret<0)
+            pr_err("request cmt2300a_gpio1 err!");
+        else {
+            virq=gpio_to_irq(cmt2300a_gpio1);
+            ret = request_irq(virq,send_handle,IRQF_TRIGGER_RISING,"cmt2300a_send_complete", NULL);
+            if(ret<0) {
+                pr_err("request cmt2300a_gpio1 to irq err!");
+            }
+        }
     }
 
-	cmt2300a_gpio2=of_get_named_gpio_flags(pdev->dev.of_node, "gpio2-gpios", 0 , 0);
-	if(cmt2300a_gpio2 < 0){
+    cmt2300a_gpio2=of_get_named_gpio_flags(pdev->dev.of_node, "gpio2-gpios", 0 , 0);
+    if(cmt2300a_gpio2 < 0) {
         pr_err("Unable to get cmt2300a_gpio2\n");
-    }else{
-            ret=gpio_request(cmt2300a_gpio2, "cmt2300a-gpio2");
-            if(ret<0)
-				pr_err("request cmt2300a_gpio2 err!");
-			else{
-				virq=gpio_to_irq(cmt2300a_gpio2);
-				ret = request_irq(virq,receive_handle,IRQF_TRIGGER_RISING,"cmt2300a_receive_complete", NULL);
-				if(ret<0){
-					pr_err("request cmt2300a_gpio2 to irq err!");
-				}
-			}
+    } else {
+        ret=gpio_request(cmt2300a_gpio2, "cmt2300a-gpio2");
+        if(ret<0)
+            pr_err("request cmt2300a_gpio2 err!");
+        else {
+            virq=gpio_to_irq(cmt2300a_gpio2);
+            ret = request_irq(virq,receive_handle,IRQF_TRIGGER_RISING,"cmt2300a_receive_complete", NULL);
+            if(ret<0) {
+                pr_err("request cmt2300a_gpio2 to irq err!");
+            }
+        }
     }
 }
 
 static int cmt2300a_probe(struct platform_device *pdev)
 {
-	pr_info("cmt2300a_probe\n");
-	get_dts_info(pdev);
-	init_completion(&tx_done_complete);
-	init_completion(&rx_done_complete);
-	gpio_direction_output(cmt2300a_en,0);
-	wakeup_source_init(&tx_wake_lock, "tx_wake_lock");
-	wakeup_source_init(&rx_wake_lock, "rx_wake_lock");
-	device_create_file(&pdev->dev, &dev_attr_send);
-	device_create_file(&pdev->dev, &dev_attr_receive);
-	device_create_file(&pdev->dev, &dev_attr_exist);
-	device_create_file(&pdev->dev, &dev_attr_send_test);
-	return 0;
+    int ret;
+    pr_info("cmt2300a_probe\n");
+    get_dts_info(pdev);
+    init_completion(&tx_done_complete);
+    init_completion(&rx_done_complete);
+    gpio_direction_output(cmt2300a_en,0);
+    wakeup_source_init(&tx_wake_lock, "tx_wake_lock");
+    wakeup_source_init(&rx_wake_lock, "rx_wake_lock");
+    ret = sysfs_create_group(&pdev->dev.kobj,&cmt2300a_attributes_group);
+    if (ret) {
+        pr_err("failed to register cmt2300a sysfs\n");
+        return ret;
+    }
+    return 0;
 }
 
 static int cmt2300a_suspend(struct device *dev)
 {
-	return 0;
+    return 0;
 }
 
 static int cmt2300a_resume(struct device *dev)
 {
-	return 0;
+    return 0;
 }
 
 static const struct dev_pm_ops cmt2300a_ops = {
-	.suspend = cmt2300a_suspend,
-	.resume  = cmt2300a_resume,
+    .suspend = cmt2300a_suspend,
+    .resume  = cmt2300a_resume,
 };
 
 static int cmt2300a_remove(struct platform_device *pdev)
 {
-	return 0;
+    return 0;
 }
 
 static const struct of_device_id cmt2300a_match[] = {
-	{ .compatible = "cmostek,cmt2300a", },
-	{},
+    { .compatible = "cmostek,cmt2300a", },
+    {},
 };
 
 static struct platform_driver cmt2300a_module_driver = {
-	.probe		= cmt2300a_probe,
-	.remove		= cmt2300a_remove,
-	.driver		= {
-		.name	= "cmt2300a",
-		.of_match_table = cmt2300a_match,
-		.pm = &cmt2300a_ops,
-	},
+    .probe		= cmt2300a_probe,
+    .remove		= cmt2300a_remove,
+    .driver		= {
+        .name	= "cmt2300a",
+        .of_match_table = cmt2300a_match,
+        .pm = &cmt2300a_ops,
+    },
 };
 
 module_platform_driver(cmt2300a_module_driver);
